@@ -6,21 +6,19 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.2</version>
+        <version>4.0.1</version>
         <relativePath />
         <!-- lookup parent from repository -->
     </parent>
     <groupId>com.incode</groupId>
     <artifactId>todo-microservice</artifactId>
-    <version>0.0.6-snapshot</version>
+    <version>0.0.9-snapshot</version>
     <name>todo-microservice-spring</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>
         <java.version>25</java.version>
-        <!-- Spring 6.x ASM metadata reading doesn't fully support Java 25 class files yet. -->
-        <maven.compiler.release>21</maven.compiler.release>
-        <bytebuddy.agent.version>1.15.11</bytebuddy.agent.version>
+        <maven.compiler.release>25</maven.compiler.release>
     </properties>
 
     <dependencies>
@@ -54,12 +52,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy-agent</artifactId>
-            <version>${bytebuddy.agent.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -125,9 +117,26 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>-javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${bytebuddy.agent.version}/byte-buddy-agent-${bytebuddy.agent.version}.jar -XX:+EnableDynamicAgentLoading --enable-native-access=ALL-UNNAMED</argLine>
-                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.9.0,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

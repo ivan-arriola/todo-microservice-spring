@@ -13,6 +13,9 @@ mvn -q test
 mvn -DskipTests spring-boot:build-image
 ```
 
+Image customization is available via Spring Boot build-image properties such as
+`spring-boot.build-image.builder` and `spring-boot.build-image.imageName`.
+
 ## Resources
 
 * [Spring Boot Reference Documentation](https://docs.spring.io/spring-boot/index.html)
