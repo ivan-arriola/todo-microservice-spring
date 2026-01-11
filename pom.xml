@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.0</version>
+        <version>3.4.2</version>
         <relativePath />
         <!-- lookup parent from repository -->
     </parent>
@@ -17,7 +17,10 @@
     <description>Demo project for Spring Boot</description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>25</java.version>
+        <!-- Spring 6.x ASM metadata reading doesn't fully support Java 25 class files yet. -->
+        <maven.compiler.release>21</maven.compiler.release>
+        <bytebuddy.agent.version>1.15.11</bytebuddy.agent.version>
     </properties>
 
     <dependencies>
@@ -26,9 +29,8 @@
             <artifactId>spring-boot-starter-data-r2dbc</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.r2dbc</groupId>
+            <groupId>org.postgresql</groupId>
             <artifactId>r2dbc-postgresql</artifactId>
-            <version>0.8.13.RELEASE</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -46,12 +48,18 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
+            <version>1.18.38</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>${bytebuddy.agent.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -85,7 +93,7 @@
                     <image>
                         <name>incode/${project.artifactId}:latest</name>
                         <env>
-                            <BP_JVM_VERSION>17</BP_JVM_VERSION>
+                        <BP_JVM_VERSION>25</BP_JVM_VERSION>
                         </env>
                     </image>
                     <excludes>
@@ -100,22 +108,29 @@
                     </excludes>
                 </configuration>
             </plugin>
-
             <plugin>
-                <groupId>kupusoglu.orhan</groupId>
-                <artifactId>bazelize-maven-plugin</artifactId>
-                <version>0.3.3</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.38</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${bytebuddy.agent.version}/byte-buddy-agent-${bytebuddy.agent.version}.jar -XX:+EnableDynamicAgentLoading --enable-native-access=ALL-UNNAMED</argLine>
+                </configuration>
+            </plugin>
+
         </plugins>
-
-
-        <extensions>
-            <extension>
-                <groupId>kupusoglu.orhan</groupId>
-                <artifactId>bazelize-maven-plugin</artifactId>
-                <version>0.3.3</version>
-            </extension>
-        </extensions>
 
     </build>
 
