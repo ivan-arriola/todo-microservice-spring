@@ -1,0 +1,191 @@
+openapi: 3.0.3
+info:
+  title: Tasks API (Local)
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: API Server
+paths:
+  /api/v1/tasks:
+    get:
+      summary: List tasks
+      description: Optionally include deleted tasks.
+      parameters:
+        - $ref: "#/components/parameters/include"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      summary: Create task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskCreateRequest"
+            examples:
+              example:
+                value:
+                  title: Custom title
+                  description: This is my custom description
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /api/v1/tasks/{taskId}:
+    get:
+      summary: Get task by ID
+      parameters:
+        - $ref: "#/components/parameters/taskId"
+        - $ref: "#/components/parameters/include"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Not Found
+    patch:
+      summary: Update task
+      parameters:
+        - $ref: "#/components/parameters/taskId"
+        - $ref: "#/components/parameters/completed"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdateRequest"
+            examples:
+              example:
+                value:
+                  title: Updated title2
+                  description: Updated description2
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Not Found
+    delete:
+      summary: Delete task
+      parameters:
+        - $ref: "#/components/parameters/taskId"
+        - $ref: "#/components/parameters/soft"
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+
+  /admin/liveness:
+    get:
+      summary: Liveness probe
+      servers:
+        - url: http://localhost:8084
+          description: Admin Server
+      responses:
+        "200":
+          description: OK
+
+  /admin/readiness:
+    get:
+      summary: Readiness probe
+      servers:
+        - url: http://localhost:8084
+          description: Admin Server
+      responses:
+        "200":
+          description: OK
+
+components:
+  parameters:
+    taskId:
+      name: taskId
+      in: path
+      required: true
+      description: Task UUID
+      schema:
+        type: string
+        format: uuid
+      example: 846cba17-06da-4c63-9d61-23f729f75f13
+
+    include:
+      name: include
+      in: query
+      required: false
+      description: Set to `deleted` to include deleted tasks.
+      schema:
+        type: string
+        example: deleted
+
+    completed:
+      name: completed
+      in: query
+      required: false
+      description: Optional completed flag (as used by your PATCH example).
+      schema:
+        type: boolean
+      example: true
+
+    soft:
+      name: soft
+      in: query
+      required: false
+      description: Soft-delete toggle.
+      schema:
+        type: boolean
+      example: true
+
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        completed:
+          type: boolean
+        deleted:
+          type: boolean
+      required:
+        - id
+        - title
+
+    TaskCreateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+      required:
+        - title
+
+    TaskUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+      additionalProperties: false
